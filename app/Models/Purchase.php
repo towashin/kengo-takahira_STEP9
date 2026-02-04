@@ -1,5 +1,14 @@
+<?php
 
-public function product()
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Purchase extends Model
 {
-    return $this->belongsTo(Product::class);
+    protected $fillable = [
+        'user_id',
+        'product_id',
+        'quantity',
+    ];
 }

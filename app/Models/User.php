@@ -5,3 +5,8 @@ protected $fillable = [
     'email',
     'password',
 ];
+
+public function purchases()
+{
+    return $this->hasMany(Purchase::class);
+}

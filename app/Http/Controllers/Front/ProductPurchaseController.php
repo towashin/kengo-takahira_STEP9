@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Purchase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductPurchaseController extends Controller
 {
@@ -25,15 +28,26 @@ class ProductPurchaseController extends Controller
             ],
         ]);
 
-        // 在庫が0なら購入不可（念のため）
+        // 在庫0チェック（二重安全）
         if ($product->stock <= 0) {
             return back()->withErrors([
                 'quantity' => '在庫がありません。',
             ]);
         }
 
-        // 在庫を減らす（※本来はトランザクションを使う）
-        $product->decrement('stock', $request->quantity);
+        DB::transaction(function () use ($request, $product) {
+
+            // ① 購入履歴を保存
+            Purchase::create([
+                'user_id'    => Auth::id(),
+                'product_id' => $product->id,
+                'price'      => $product->price,   // 購入時価格を保存
+                'quantity'   => $request->quantity,
+            ]);
+
+            // ② 在庫を減らす
+            $product->decrement('stock', $request->quantity);
+        });
 
         return redirect()
             ->route('products.show', $product->id)
