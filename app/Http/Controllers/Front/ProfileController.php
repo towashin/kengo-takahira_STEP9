@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\UpdateProfileRequest; 
 
 class ProfileController extends Controller
 {
@@ -15,26 +15,12 @@ class ProfileController extends Controller
         return view('front.profile.edit', compact('user'));
     }
 
-    public function update(Request $request)
+    public function update(UpdateProfileRequest $request)
     {
-        $user = Auth::user();
-
-        $request->validate([
-            'username' => 'required|string|max:255',
-            'email'    => 'required|email|max:255',
-            'name'     => 'required|string|max:255',
-            'kana'     => 'required|string|max:255',
-        ]);
-
-        $user->update([
-            'username' => $request->username,
-            'email'    => $request->email,
-            'name'     => $request->name,
-            'kana'     => $request->kana,
-        ]);
+        auth()->user()->update($request->validated());
 
         return redirect()
             ->route('mypage.index')
-            ->with('success', 'アカウント情報を更新しました');
+            ->with('success', 'プロフィールを更新しました');
     }
 }

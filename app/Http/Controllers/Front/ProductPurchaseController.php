@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePurchaseRequest;
 use App\Models\Product;
 use App\Models\Purchase;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ProductPurchaseController extends Controller
 {
@@ -16,36 +16,24 @@ class ProductPurchaseController extends Controller
         return view('front.products.purchase', compact('product'));
     }
 
-    public function store(Request $request, Product $product)
+    public function store(StorePurchaseRequest $request, Product $product)
     {
-        // バリデーション
-        $request->validate([
-            'quantity' => [
-                'required',
-                'integer',
-                'min:1',
-                'max:' . $product->stock,
-            ],
-        ]);
-
-        // 在庫0チェック（二重安全）
-        if ($product->stock <= 0) {
-            return back()->withErrors([
-                'quantity' => '在庫がありません。',
-            ]);
-        }
-
         DB::transaction(function () use ($request, $product) {
 
-            // ① 購入履歴を保存
+            // 在庫チェック（二重防止）
+            if ($product->stock < $request->quantity) {
+                abort(400, '在庫が不足しています');
+            }
+
+            // 購入履歴を保存
             Purchase::create([
                 'user_id'    => Auth::id(),
                 'product_id' => $product->id,
-                'price'      => $product->price,   // 購入時価格を保存
                 'quantity'   => $request->quantity,
+                'price'      => $product->price, // 購入時の価格を保存
             ]);
 
-            // ② 在庫を減らす
+            // 在庫を減らす
             $product->decrement('stock', $request->quantity);
         });
 
