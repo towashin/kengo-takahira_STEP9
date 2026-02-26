@@ -2,126 +2,137 @@
 
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Controller Imports
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+
+use App\Http\Controllers\Front\ProductController;
+use App\Http\Controllers\Front\MyProductController;
+use App\Http\Controllers\Front\ProductPurchaseController;
+use App\Http\Controllers\Front\FavoriteController;
+use App\Http\Controllers\Front\MyPageController;
+use App\Http\Controllers\Front\ProfileController;
+use App\Http\Controllers\Front\ContactController;
+
+Route::get('/', [ProductController::class, 'index'])
+    ->name('home');
+
+/*
+|--------------------------------------------------------------------------
+| Test
+|--------------------------------------------------------------------------
+*/
 Route::get('/test', function () {
     return 'Laravel OK';
 });
 
-Route::get('/products', [ProductController::class, 'index'])
-    ->name('products.index');
-
-Route::get('/mypage', [UserController::class, 'show'])
-    ->middleware('auth')
-    ->name('mypage.show');
-
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->name('logout');
-
-Route::get('/contact', [ContactController::class, 'create'])
-    ->name('contact.create');
-
-Route::get('/products', [ProductController::class, 'index'])
-    ->name('products.index');
-
-Route::get('/mypage', [UserController::class, 'show'])
-    ->middleware('auth')
-    ->name('mypage.show');
-
-    use App\Http\Controllers\Auth\LoginController;
-
-Route::get('/login', [LoginController::class, 'showLoginForm'])
-    ->name('login');
-
+/*
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 
-Route::post('/logout', [LoginController::class, 'logout'])
-    ->name('logout');
-
-    use App\Http\Controllers\Auth\RegisterController;
-
-Route::get('/register', [RegisterController::class, 'showRegisterForm'])
-    ->name('register');
-
+Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
-    use App\Http\Controllers\Front\ProductController;
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+/*
+|--------------------------------------------------------------------------
+| Public Products
+|--------------------------------------------------------------------------
+*/
 Route::get('/products', [ProductController::class, 'index'])
     ->name('products.index');
 
-Route::get('/products/{id}', [ProductController::class, 'show'])
+Route::get('/products/{product}', [ProductController::class, 'show'])
     ->name('products.show');
 
-    use App\Http\Controllers\Front\FavoriteController;
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
 
-Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])
-    ->middleware('auth')
-    ->name('favorites.toggle');
+    /*
+    |----------------------------------------------------------------------
+    | Purchase
+    |----------------------------------------------------------------------
+    */
+    Route::get('/products/{product}/purchase', [ProductPurchaseController::class, 'create'])
+        ->name('products.purchase.form');
 
-Route::post('/cart/{product}', function ($productId) {
-    return redirect()->back()->with('success', 'カートに追加しました');
-})->name('cart.add');
+    Route::post('/products/{product}/purchase', [ProductPurchaseController::class, 'store'])
+        ->name('products.purchase');
 
-    use App\Http\Controllers\Front\ProductPurchaseController;
+    /*
+    |----------------------------------------------------------------------
+    | Favorites
+    |----------------------------------------------------------------------
+    */
+    Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])
+        ->name('favorites.toggle');
 
-Route::get('/products/{product}/purchase', [ProductPurchaseController::class, 'create'])
-    ->name('products.purchase.form');
+    /*
+    |----------------------------------------------------------------------
+    | My Page
+    |----------------------------------------------------------------------
+    */
+    Route::get('/mypage', [MyPageController::class, 'index'])
+        ->name('mypage.index');
 
-Route::post('/products/{product}/purchase', [ProductPurchaseController::class, 'store'])
-    ->name('products.purchase')
-    ->middleware('auth');
+    /*
+    |----------------------------------------------------------------------
+    | Profile
+    |----------------------------------------------------------------------
+    */
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
 
-Route::get('/products/create', [ProductController::class, 'create'])
-    ->middleware('auth')
-    ->name('products.create');
+    Route::put('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
 
-Route::post('/products', [ProductController::class, 'store'])
-    ->middleware('auth')
-    ->name('products.store');
+    /*
+    |----------------------------------------------------------------------
+    | My Products (Seller)
+    |----------------------------------------------------------------------
+    */
+    Route::get('/my/products', [MyProductController::class, 'index'])
+        ->name('my.products.index');
 
-// The following import is redundant and causes a naming conflict because ProductController is already imported earlier.
-// Removed: use App\Http\Controllers\Front\ProductController;
+    Route::get('/my/products/create', [MyProductController::class, 'create'])
+        ->name('my.products.create');
 
-Route::get('/my/products/{product}', [ProductController::class, 'showMyProduct'])
-    ->middleware('auth')
-    ->name('my.products.show');
+    Route::post('/my/products', [MyProductController::class, 'store'])
+        ->name('my.products.store');
 
-Route::delete('/my/products/{product}', [ProductController::class, 'destroy'])
-    ->middleware('auth')
-    ->name('my.products.destroy');
+    Route::get('/my/products/{product}', [MyProductController::class, 'show'])
+        ->name('my.products.show');
 
-Route::get('/my/products/{product}/edit', [ProductController::class, 'edit'])
-    ->middleware('auth')
-    ->name('my.products.edit');
+    Route::get('/my/products/{product}/edit', [MyProductController::class, 'edit'])
+        ->name('my.products.edit');
 
-Route::get('/my/products/{product}/edit', [ProductController::class, 'edit'])
-    ->middleware('auth')
-    ->name('my.products.edit');
+    Route::put('/my/products/{product}', [MyProductController::class, 'update'])
+        ->name('my.products.update');
 
-Route::put('/my/products/{product}', [ProductController::class, 'update'])
-    ->middleware('auth')
-    ->name('my.products.update');
+    Route::delete('/my/products/{product}', [MyProductController::class, 'destroy'])
+        ->name('my.products.destroy');
+});
 
-    use App\Http\Controllers\Front\ContactController;
-
+/*
+|--------------------------------------------------------------------------
+| Contact
+|--------------------------------------------------------------------------
+*/
 Route::get('/contact', [ContactController::class, 'create'])
     ->name('contact.create');
 
 Route::post('/contact', [ContactController::class, 'store'])
     ->name('contact.store');
-
-    use App\Http\Controllers\Front\MyPageController;
-
-Route::get('/mypage', [MyPageController::class, 'index'])
-    ->middleware('auth')
-    ->name('mypage.index');
-
-    use App\Http\Controllers\Front\ProfileController;
-
-Route::get('/profile/edit', [ProfileController::class, 'edit'])
-    ->middleware('auth')
-    ->name('profile.edit');
-
-Route::put('/profile', [ProfileController::class, 'update'])
-    ->middleware('auth')
-    ->name('profile.update');
-
