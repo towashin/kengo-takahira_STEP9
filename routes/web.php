@@ -18,6 +18,9 @@ use App\Http\Controllers\Front\MyPageController;
 use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\ContactController;
 
+Route::get('/', [ProductController::class, 'index'])
+    ->name('home');
+
 /*
 |--------------------------------------------------------------------------
 | Test

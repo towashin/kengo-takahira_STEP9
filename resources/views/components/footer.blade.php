@@ -14,7 +14,7 @@
             </li>
 
             <li class="footer__item">
-                <a href="{{ route('mypage.show') }}" class="footer__link">
+                <a href="{{ route('mypage.index') }}" class="footer__link">
                     マイページ
                 </a>
             </li>

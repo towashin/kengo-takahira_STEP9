@@ -2,14 +2,16 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'ECサイト')</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <title>ECサイト</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 <body>
 
 @include('components.header')
 
-<main>
+<main class="container">
     @yield('content')
 </main>
 
