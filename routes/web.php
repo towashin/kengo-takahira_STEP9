@@ -17,9 +17,13 @@ use App\Http\Controllers\Front\FavoriteController;
 use App\Http\Controllers\Front\MyPageController;
 use App\Http\Controllers\Front\ProfileController;
 use App\Http\Controllers\Front\ContactController;
+use App\Http\Controllers\Front\CartController;
 
 Route::get('/', [ProductController::class, 'index'])
     ->name('home');
+
+Route::post('/cart/{product}', [CartController::class, 'add'])
+->name('cart.add');
 
 /*
 |--------------------------------------------------------------------------

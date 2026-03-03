@@ -10,6 +10,34 @@ use Illuminate\Support\Facades\Auth;
 class MyProductController extends Controller
 {
     /**
+     * 新規作成画面
+     */
+    public function create()
+    {
+        return view('front.my_products.create');
+    }
+
+    /**
+     * 保存処理
+     */
+    public function store(Request $request)
+    {
+    $validated = $request->validate([
+        'name'        => 'required|string|max:255',
+        'price'       => 'required|integer|min:0',
+        'description' => 'nullable|string',
+        'stock'       => 'required|integer|min:0',
+    ]);
+
+    $validated['user_id'] = Auth::id();
+
+    $product = Product::create($validated);
+
+    return redirect()
+        ->route('my.products.show', $product)
+        ->with('success', '商品を登録しました');
+}
+    /**
      * 自分の出品商品一覧
      */
     public function index()

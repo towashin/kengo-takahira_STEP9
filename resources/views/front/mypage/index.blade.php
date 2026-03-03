@@ -22,7 +22,7 @@
 {{-- 出品商品 --}}
 <h2>出品商品一覧</h2>
 
-<a href="{{ route('products.create') }}">商品新規登録</a>
+<a href="{{ route('my.products.create') }}">商品新規登録</a>
 
 @if ($products->isEmpty())
     <p>出品中の商品はありません。</p>
@@ -68,4 +68,5 @@
     @endforeach
 </table>
 @endif
+
 @endsection
